@@ -3,6 +3,7 @@ import { formatCurrency } from "../../utils/helpers";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { deleteCabin } from "../../services/apiCabins";
 import Spinner from "../../ui/Spinner";
+import toast from "react-hot-toast";
 
 const TableRow = styled.div`
   display: grid;
@@ -68,16 +69,16 @@ function CabinRow({ cabin }: CabinRowProps) {
 
   const queryClient = useQueryClient();
 
-  const { mutate, isLoading } = useMutation({
+  const { mutate, isPending } = useMutation({
     mutationFn: deleteCabin,
     onSuccess: () => {
-      alert("Cabin successfully deleted"),
+      toast("Cabin successfully deleted"),
         queryClient.invalidateQueries({ queryKey: ["cabins"] });
     },
-    onError: (err) => alert(err.message),
+    onError: (err) => toast(err.message),
   });
 
-  if (isLoading) return <Spinner />;
+  if (isPending) return <Spinner />;
 
   return (
     <TableRow role="row">
@@ -90,7 +91,7 @@ function CabinRow({ cabin }: CabinRowProps) {
       ) : (
         <span>&mdash;</span>
       )}
-      <button onClick={() => mutate(cabinId)} disabled={isLoading}>
+      <button onClick={() => mutate(cabinId)} disabled={isPending}>
         Delete
       </button>
     </TableRow>
