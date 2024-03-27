@@ -41,8 +41,8 @@ interface IProps {
 }
 
 interface IFormRow {
-  label: string;
-  error: string;
+  label?: string;
+  error?: string;
   children: React.ReactElement<IProps>;
 }
 
