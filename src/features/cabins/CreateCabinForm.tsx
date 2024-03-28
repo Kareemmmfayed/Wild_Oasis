@@ -9,6 +9,21 @@ import FormRow from "../../ui/FormRow";
 import { useCreateCabin } from "./useCreateCabin";
 import { useEditCabin } from "./useEditCabin";
 
+interface ICabin {
+  id: number;
+  name: string;
+  maxCapacity: number;
+  regularPrice: number;
+  discount: number;
+  description: string;
+  image: string;
+}
+
+interface CabinFormProps {
+  cabinToEdit?: ICabin;
+  onCloseModal?: () => void;
+}
+
 function CreateCabinForm({
   cabinToEdit = {
     id: 0,
@@ -19,9 +34,10 @@ function CreateCabinForm({
     image: "",
     description: "",
   },
-}) {
-  const { id: editId, ...editValues } = cabinToEdit;
-  const isEditSession = cabinToEdit.id === 0 ? false : true;
+  onCloseModal,
+}: CabinFormProps) {
+  const { id: editId, ...editValues } = cabinToEdit!;
+  const isEditSession = cabinToEdit?.id === 0 ? false : true;
 
   const { register, handleSubmit, reset, getValues, formState } = useForm({
     defaultValues: isEditSession ? editValues : {},
@@ -51,6 +67,7 @@ function CreateCabinForm({
         {
           onSuccess: () => {
             reset();
+            onCloseModal?.();
           },
         }
       );
@@ -59,7 +76,10 @@ function CreateCabinForm({
   if (isWorking) return <Spinner />;
 
   return (
-    <Form onSubmit={handleSubmit(onSubmit)}>
+    <Form
+      onSubmit={handleSubmit(onSubmit)}
+      type={onCloseModal ? "modal" : "regular"}
+    >
       <FormRow label="Cabin name" error={errors?.name?.message as string}>
         <Input
           disabled={isWorking}
@@ -151,7 +171,9 @@ function CreateCabinForm({
         <Button disabled={isWorking}>
           {isEditSession ? "Edit cabin" : "Create new cabin"}
         </Button>
-        <Button type="reset">Cancel</Button>
+        <Button type="reset" onClick={() => onCloseModal?.()}>
+          Cancel
+        </Button>
       </div>
     </Form>
   );
