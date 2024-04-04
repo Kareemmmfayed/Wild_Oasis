@@ -8,6 +8,7 @@ import React, {
   useContext,
   ReactElement,
 } from "react";
+import { useClickOutside } from "../hooks/useClickOutside";
 
 const StyledModal = styled.div`
   position: fixed;
@@ -101,11 +102,13 @@ interface WindowProps {
 function Window({ children, name }: WindowProps) {
   const { openName, close } = useContext(ModalContext)!;
 
+  const ref = useClickOutside(close);
+
   if (name !== openName) return null;
 
   return createPortal(
     <Overlay>
-      <StyledModal>
+      <StyledModal ref={ref}>
         <Button onClick={close}>
           <HiXMark />
         </Button>
