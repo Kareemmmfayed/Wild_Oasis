@@ -58,12 +58,12 @@ const Footer = styled.footer`
   }
 `;
 
-const Empty = styled.p`
-  font-size: 1.6rem;
-  font-weight: 500;
-  text-align: center;
-  margin: 2.4rem;
-`;
+// const Empty = styled.p`
+//   font-size: 1.6rem;
+//   font-weight: 500;
+//   text-align: center;
+//   margin: 2.4rem;
+// `;
 
 interface cabin {
   id: number;
@@ -133,9 +133,9 @@ interface BodyProps {
 }
 
 function Body({ data, render }: BodyProps) {
-  if (!data!.length) return <Empty>No data to show at the moment</Empty>;
+  // if (!data!.length) return <Empty>No data to show at the moment</Empty>;
 
-  return <StyledBody>{data!.map(render)}</StyledBody>;
+  return <StyledBody>{data?.map(render)}</StyledBody>;
 }
 
 Table.Header = Header;

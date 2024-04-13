@@ -1,7 +1,51 @@
+import { PAGE_SIZE } from "../utils/constants";
 import { getToday } from "../utils/helpers";
 import supabase from "./supabase";
 
-export async function getBooking(id) {
+export async function getBookings({
+  filter,
+  sortBy,
+  page,
+}: {
+  filter?: { field: string; value: string; method: string } | null;
+  sortBy?: { field: string; direction: string } | null;
+  page?: number;
+}) {
+  try {
+    let query = supabase
+      .from("bookings")
+      .select(
+        "id,createdAt,startDate,endDate,numNights,numGuests,status,totalPrice, cabins(name), guests(fullName,email)",
+        { count: "exact" }
+      );
+
+    // FILTER
+    if (filter) query = query.eq(filter!.field, filter!.value);
+
+    // SORT
+    if (sortBy)
+      query = query.order(sortBy.field, {
+        ascending: sortBy.direction === "asc",
+      });
+
+    // PAGINATION
+    if (page) {
+      const from = (page - 1) * PAGE_SIZE;
+      const to = from + PAGE_SIZE - 1;
+      query = query.range(from, to);
+    }
+    const { data, error, count } = await query;
+
+    if (error) {
+      throw new Error("Bookings couldn't be loaded");
+    }
+    return { data, count };
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+export async function getBooking(id: number) {
   const { data, error } = await supabase
     .from("bookings")
     .select("*, cabins(*), guests(*)")
@@ -16,13 +60,12 @@ export async function getBooking(id) {
   return data;
 }
 
-// Returns all BOOKINGS that are were created after the given date. Useful to get bookings created in the last 30 days, for example.
-export async function getBookingsAfterDate(date) {
+export async function getBookingsAfterDate(date: Date | string) {
   const { data, error } = await supabase
     .from("bookings")
-    .select("created_at, totalPrice, extrasPrice")
-    .gte("created_at", date)
-    .lte("created_at", getToday({ end: true }));
+    .select("createdAt, totalPrice, extrasPrice")
+    .gte("createdAt", date)
+    .lte("createdAt", getToday({ end: true }));
 
   if (error) {
     console.error(error);
@@ -33,10 +76,9 @@ export async function getBookingsAfterDate(date) {
 }
 
 // Returns all STAYS that are were created after the given date
-export async function getStaysAfterDate(date) {
+export async function getStaysAfterDate(date: Date | string) {
   const { data, error } = await supabase
     .from("bookings")
-    // .select('*')
     .select("*, guests(fullName)")
     .gte("startDate", date)
     .lte("startDate", getToday());
@@ -49,7 +91,6 @@ export async function getStaysAfterDate(date) {
   return data;
 }
 
-// Activity means that there is a check in or a check out today
 export async function getStaysTodayActivity() {
   const { data, error } = await supabase
     .from("bookings")
@@ -57,11 +98,7 @@ export async function getStaysTodayActivity() {
     .or(
       `and(status.eq.unconfirmed,startDate.eq.${getToday()}),and(status.eq.checked-in,endDate.eq.${getToday()})`
     )
-    .order("created_at");
-
-  // Equivalent to this. But by querying this, we only download the data we actually need, otherwise we would need ALL bookings ever created
-  // (stay.status === 'unconfirmed' && isToday(new Date(stay.startDate))) ||
-  // (stay.status === 'checked-in' && isToday(new Date(stay.endDate)))
+    .order("createdAt");
 
   if (error) {
     console.error(error);
@@ -70,7 +107,8 @@ export async function getStaysTodayActivity() {
   return data;
 }
 
-export async function updateBooking(id, obj) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function updateBooking(id: number, obj: any) {
   const { data, error } = await supabase
     .from("bookings")
     .update(obj)
@@ -85,13 +123,24 @@ export async function updateBooking(id, obj) {
   return data;
 }
 
-export async function deleteBooking(id) {
-  // REMEMBER RLS POLICIES
+export async function deleteBooking(id: number) {
   const { data, error } = await supabase.from("bookings").delete().eq("id", id);
 
   if (error) {
     console.error(error);
     throw new Error("Booking could not be deleted");
   }
+  return data;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function createBooking(newBooking: any) {
+  const { data, error } = await supabase
+    .from("bookings")
+    .insert([{ ...newBooking }])
+    .select();
+
+  if (error) throw new Error(error.message);
+
   return data;
 }
