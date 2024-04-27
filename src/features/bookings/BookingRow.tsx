@@ -6,6 +6,7 @@ import Table from "../../ui/Table";
 
 import { formatCurrency } from "../../utils/helpers";
 import { formatDistanceFromNow } from "../../utils/helpers";
+import { Booking } from "./BookingTable";
 import Menus from "../../ui/Menus";
 import {
   HiArrowDownOnSquare,
@@ -46,26 +47,13 @@ const Amount = styled.div`
   font-weight: 500;
 `;
 
-interface IBooking {
-  id: number;
-  createdAt: string;
-  startDate: string;
-  endDate: string;
-  numNights: number;
-  numGuests: number;
-  totalPrice: number;
-  status: string;
-  guests: { fullName: string; email: string };
-  cabins: { name: string };
-}
-
 interface BookingRowProps {
-  booking: IBooking;
+  booking: Booking;
 }
 
 function BookingRow({
   booking: {
-    id: bookingId,
+    id: bookingID,
     startDate,
     endDate,
     numNights,
@@ -116,18 +104,18 @@ function BookingRow({
 
       <Modal>
         <Menus.Menu>
-          <Menus.Toggle id={bookingId} />
-          <Menus.List id={bookingId}>
+          <Menus.Toggle id={bookingID} />
+          <Menus.List id={bookingID}>
             <Menus.Button
               icon={<HiEye />}
-              onClick={() => navigate(`/bookings/${bookingId}`)}
+              onClick={() => navigate(`/bookings/${bookingID}`)}
             >
               See details
             </Menus.Button>
             {status === "unconfirmed" && (
               <Menus.Button
                 icon={<HiArrowDownOnSquare />}
-                onClick={() => navigate(`/checkin/${bookingId}`)}
+                onClick={() => navigate(`/checkin/${bookingID}`)}
               >
                 Check in
               </Menus.Button>
@@ -135,7 +123,7 @@ function BookingRow({
             {status === "checked-in" && (
               <Menus.Button
                 icon={<HiArrowUpOnSquare />}
-                onClick={() => checkout(bookingId)}
+                onClick={() => checkout(bookingID)}
                 disabled={isCheckingOut}
               >
                 Check out
@@ -152,7 +140,7 @@ function BookingRow({
           <ConfirmDelete
             resourceName="booking"
             disabled={isDeleting}
-            onConfirm={() => deleteBooking(bookingId)}
+            onConfirm={() => deleteBooking(bookingID)}
           />
         </Modal.Window>
       </Modal>

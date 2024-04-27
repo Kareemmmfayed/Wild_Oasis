@@ -11,7 +11,7 @@ export function useBookings() {
   const filterValue = serachParams.get("status");
   const filter =
     !filterValue || filterValue === "all"
-      ? null
+      ? undefined
       : { field: "status", value: filterValue, method: "eq" };
 
   // ٍSORT
@@ -25,17 +25,14 @@ export function useBookings() {
     : parseInt(serachParams.get("page")!);
 
   // QUERY
-  const {
-    data: { data: bookings, count } = {},
-    isLoading,
-    error,
-  } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ["bookings", filter, sortBy, page],
     queryFn: () => getBookings({ filter, sortBy, page: page }),
   });
 
   // PRE-FETCHING
-  const pageCount = Math.ceil(count! / PAGE_SIZE);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const pageCount = Math.ceil((data as any)?.count / PAGE_SIZE);
   if (page < pageCount)
     queryClient.prefetchQuery({
       queryKey: ["bookings", filter, sortBy, page + 1],
@@ -48,5 +45,5 @@ export function useBookings() {
       queryFn: () => getBookings({ filter, sortBy, page: page - 1 }),
     });
 
-  return { bookings, isLoading, error, count };
+  return { data, isLoading, error, pageCount };
 }

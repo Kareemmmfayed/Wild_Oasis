@@ -7,15 +7,15 @@ export async function getBookings({
   sortBy,
   page,
 }: {
-  filter?: { field: string; value: string; method: string } | null;
-  sortBy?: { field: string; direction: string } | null;
+  filter?: { field: string; value: string; method: string };
+  sortBy?: { field: string; direction: string };
   page?: number;
 }) {
   try {
     let query = supabase
       .from("bookings")
       .select(
-        "id,createdAt,startDate,endDate,numNights,numGuests,status,totalPrice, cabins(name), guests(fullName,email)",
+        "id,created_at,startDate,endDate,numNights,numGuests,status,totalPrice, cabins(name), guests(fullName,email)",
         { count: "exact" }
       );
 
@@ -60,6 +60,7 @@ export async function getBooking(id: number) {
   return data;
 }
 
+// Returns all BOOKINGS that are were created after the given date. Useful to get bookings created in the last 30 days, for example.
 export async function getBookingsAfterDate(date: Date | string) {
   const { data, error } = await supabase
     .from("bookings")
@@ -91,6 +92,7 @@ export async function getStaysAfterDate(date: Date | string) {
   return data;
 }
 
+// Activity means that there is a check in or a check out today
 export async function getStaysTodayActivity() {
   const { data, error } = await supabase
     .from("bookings")
@@ -99,6 +101,10 @@ export async function getStaysTodayActivity() {
       `and(status.eq.unconfirmed,startDate.eq.${getToday()}),and(status.eq.checked-in,endDate.eq.${getToday()})`
     )
     .order("createdAt");
+
+  // Equivalent to this. But by querying this, we only download the data we actually need, otherwise we would need ALL bookings ever created
+  // (stay.status === 'unconfirmed' && isToday(new Date(stay.startDate))) ||
+  // (stay.status === 'checked-in' && isToday(new Date(stay.endDate)))
 
   if (error) {
     console.error(error);
@@ -124,6 +130,7 @@ export async function updateBooking(id: number, obj: any) {
 }
 
 export async function deleteBooking(id: number) {
+  // REMEMBER RLS POLICIES
   const { data, error } = await supabase.from("bookings").delete().eq("id", id);
 
   if (error) {

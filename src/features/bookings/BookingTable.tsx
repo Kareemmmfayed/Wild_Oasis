@@ -1,13 +1,13 @@
 import BookingRow from "./BookingRow";
 import Table from "../../ui/Table";
 import Menus from "../../ui/Menus";
-// import Empty from "../../ui/Empty";
+import Empty from "../../ui/Empty";
 import { useBookings } from "./useBookings";
 import Spinner from "../../ui/Spinner";
 import Pagination from "../../ui/Pagination";
 import AddBooking from "./AddBooking";
 
-interface IBooking {
+export type Booking = {
   id: number;
   createdAt: string;
   startDate: string;
@@ -18,14 +18,15 @@ interface IBooking {
   status: string;
   guests: { fullName: string; email: string };
   cabins: { name: string };
-}
+};
 
 function BookingTable() {
-  const { bookings, isLoading, count } = useBookings();
+  const { data: bookings, isLoading, pageCount } = useBookings();
+  console.log(bookings);
 
   if (isLoading) return <Spinner />;
 
-  // if (!bookings!.length) return <Empty resourceName="bookings" />;
+  if (!bookings) return <Empty resourceName="bookings" />;
 
   return (
     <Menus>
@@ -40,13 +41,13 @@ function BookingTable() {
         </Table.Header>
 
         <Table.Body
-          data={bookings as never}
+          data={bookings.data as never}
           render={(booking) => (
-            <BookingRow key={booking.id} booking={booking as IBooking} />
+            <BookingRow key={booking.id} booking={booking as Booking} />
           )}
         />
         <Table.Footer>
-          <Pagination count={count!} />
+          <Pagination count={pageCount} />
         </Table.Footer>
       </Table>
       <AddBooking />

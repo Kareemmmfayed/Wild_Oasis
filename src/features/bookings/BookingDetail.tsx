@@ -33,7 +33,7 @@ function BookingDetail() {
 
   if (isLoading) return <Spinner />;
 
-  // if (!booking) return <Empty resource="booking" />;
+  // if (!booking) return <Empty resourceName="booking" />;
 
   const { status, id } = booking;
 
