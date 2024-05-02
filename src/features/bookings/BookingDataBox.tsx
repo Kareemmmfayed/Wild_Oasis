@@ -68,11 +68,11 @@ const Guest = styled.div`
   }
 `;
 
-interface IPrice {
+interface PriceProps {
   isPaid: boolean;
 }
 
-const Price = styled.div<IPrice>`
+const Price = styled.div<PriceProps>`
   display: flex;
   align-items: center;
   justify-content: space-between;
