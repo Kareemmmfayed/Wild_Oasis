@@ -7,15 +7,15 @@ export async function getBookings({
   sortBy,
   page,
 }: {
-  filter?: { field: string; value: string; method: string };
-  sortBy?: { field: string; direction: string };
+  filter?: { field: string; value: string; method: string } | null;
+  sortBy?: { field: string; direction: string } | null;
   page?: number;
 }) {
   try {
     let query = supabase
       .from("bookings")
       .select(
-        "id,created_at,startDate,endDate,numNights,numGuests,status,totalPrice, cabins(name), guests(fullName,email)",
+        "id,createdAt,startDate,endDate,numNights,numGuests,status,totalPrice, cabins(name), guests(fullName,email)",
         { count: "exact" }
       );
 
@@ -64,9 +64,9 @@ export async function getBooking(id: number) {
 export async function getBookingsAfterDate(date: Date | string) {
   const { data, error } = await supabase
     .from("bookings")
-    .select("created_at, totalPrice, extrasPrice")
-    .gte("created_at", date)
-    .lte("created_at", getToday({ end: true }));
+    .select("createdAt, totalPrice, extrasPrice")
+    .gte("createdAt", date)
+    .lte("createdAt", getToday({ end: true }));
 
   if (error) {
     console.error(error);

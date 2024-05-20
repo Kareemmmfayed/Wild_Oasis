@@ -16,7 +16,6 @@ import toast from "react-hot-toast";
 
 import { useCreateBooking } from "./useCreateBooking";
 import { useGuests } from "../../hooks/useGuests";
-
 const StyledSelect = styled.select`
   border: 1px solid var(--color-grey-300);
   background-color: var(--color-grey-0);
